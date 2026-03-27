@@ -1,12 +1,23 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 
 export async function POST(req: Request) {
   try {
     const { email } = await req.json();
 
     if (!email || !email.includes('@')) {
-      return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
+      return NextResponse.json({ error: 'Nevazeci email' }, { status: 400 });
+    }
+
+    // getSupabase() je sync na clientu, async na serveru — koristimo bez await
+    const supabaseAdmin = getSupabase();
+
+    // Demo mod — vrati uspjeh bez Supabase
+    if (!supabaseAdmin) {
+      return NextResponse.json({
+        success: true,
+        message: 'Demo mod — čeka se Supabase konfiguracija',
+      });
     }
 
     const { error } = await supabaseAdmin
@@ -15,17 +26,17 @@ export async function POST(req: Request) {
 
     if (error) {
       if (error.code === '23505') {
-        return NextResponse.json({ error: 'Email already on waitlist' }, { status: 409 });
+        return NextResponse.json({ error: 'Email vec postoji' }, { status: 409 });
       }
-      return NextResponse.json({ error: 'Failed to join waitlist' }, { status: 500 });
+      return NextResponse.json({ error: 'Greska pri spremanju' }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, message: 'Successfully joined waitlist!' });
+    return NextResponse.json({ success: true, message: 'Uspjesno upisani!' });
   } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Server greska' }, { status: 500 });
   }
 }
 
 export async function GET() {
-  return NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
+  return NextResponse.json({ error: 'Metoda nije dozvoljena' }, { status: 405 });
 }

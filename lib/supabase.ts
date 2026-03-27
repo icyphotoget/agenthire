@@ -1,12 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
+// Koristi client-side supabase (sync, null-safe)
+import { getSupabase as getClient } from './supabase-client';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// API route koristi ovu funkciju — sync, null-safe
+export function getSupabase() {
+  return getClient();
+}
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-export const supabaseAdmin = createClient(
-  supabaseUrl,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { persistSession: false } }
-);
+export { getSupabase as supabase, getSupabase as supabaseAdmin };
